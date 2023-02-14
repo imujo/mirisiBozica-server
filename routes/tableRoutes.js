@@ -18,6 +18,45 @@ router.get("/table/id", async (req, res, next) => {
   }
 });
 
+router.get("/table/ids", async (req, res, next) => {
+  try {
+    const { table_ids, user_id } = req.query;
+
+    if (!table_ids) {
+      res.json({ msg: "No tables found!", data: [] });
+      return;
+    }
+
+    const data = await db("tables").whereIn("id", table_ids).select();
+
+    if (!data.length) {
+      throw new Error("No tables found");
+    }
+
+    res.json({ msg: "Successfuly got tables!", data: data });
+  } catch (error) {
+    next(error);
+  }
+});
+
+router.get("/table/room", async (req, res, next) => {
+  try {
+    const { room_id, user_id } = req.query;
+
+    const data = await db("tables")
+      .where({ user_id: user_id, room_id: room_id })
+      .select();
+
+    if (!data.length) {
+      throw new Error("No tables found");
+    }
+
+    res.json({ msg: "Successfuly got tables!", data: data });
+  } catch (error) {
+    next(error);
+  }
+});
+
 router.post("/table", async (req, res, next) => {
   try {
     const { title, user_id, room_id, n_mjesta, posx, posy } = req.body;

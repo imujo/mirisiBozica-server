@@ -6,9 +6,14 @@ require("dotenv").config();
 const eventRoutes = require("./routes/eventRoutes");
 const roomRoutes = require("./routes/roomRoutes");
 const tableRoutes = require("./routes/tableRoutes");
+const restaurantRoutes = require("./routes/restaurantRoutes");
 
 const errorHandler = (error, request, response, next) => {
+  console.log("\n\n");
   console.error(`ERROR - ${error.message}`);
+  console.log(error);
+  console.log("\n\n");
+
   const status = error.status || 400;
   response.status(status).json({ msg: error.message });
   next();
@@ -18,6 +23,7 @@ app.use(cors());
 app.use(bodyParser.json());
 
 app.use(eventRoutes);
+app.use(restaurantRoutes);
 app.use(roomRoutes);
 app.use(tableRoutes);
 
