@@ -12,7 +12,7 @@ router.get("/restaurant_event/id", async (req, res, next) => {
   });
 
   if (response.error) {
-    next(response.error);
+    return next(response.error);
   }
 
   res.json({
@@ -30,7 +30,7 @@ router.get("/restaurant_event/date", async (req, res, next) => {
   });
 
   if (response.error) {
-    next(response.error);
+    return next(response.error);
   }
 
   res.json({
@@ -47,7 +47,7 @@ router.post("/restaurant_event", async (req, res, next) => {
   const response = await postEvent("restaurant_events", user_id);
 
   if (response.error) {
-    next(response.error);
+    return next(response.error);
   }
 
   res.json({
@@ -86,7 +86,7 @@ router.put("/restaurant_event", async (req, res, next) => {
   const response = await put("restaurant_events", where, insertBody);
 
   if (response.error) {
-    next(response.error);
+    return next(response.error);
   }
 
   res.json({
@@ -107,7 +107,7 @@ router.get("/restaurant_event/room", async (req, res, next) => {
   );
 
   if (response.error) {
-    next(response.error);
+    return next(response.error);
   }
 
   res.json({
@@ -128,7 +128,7 @@ router.put("/restaurant_event/room", async (req, res, next) => {
   const response = await put("restaurant_events", where, insertBody);
 
   if (response.error) {
-    next(response.error);
+    return next(response.error);
   }
 
   res.json({
@@ -161,7 +161,7 @@ router.get("/restaurant_event/tables", async (req, res, next) => {
   //     },
   //   });
   // } catch (error) {
-  //   next(error);
+  //   return next(error);
   // }
 
   const { user_id, restaurant_event_id } = req.query;
@@ -175,7 +175,7 @@ router.get("/restaurant_event/tables", async (req, res, next) => {
   );
 
   if (response.error) {
-    next(response.error);
+    return next(response.error);
   }
 
   res.json({
@@ -197,7 +197,7 @@ router.put("/restaurant_event/tables", async (req, res, next) => {
   );
 
   if (response.error) {
-    next(response.error);
+    return next(response.error);
   }
 
   res.json({
