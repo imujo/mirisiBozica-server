@@ -7,6 +7,7 @@ const eventRoutes = require("./routes/eventRoutes");
 const roomRoutes = require("./routes/roomRoutes");
 const tableRoutes = require("./routes/tableRoutes");
 const restaurantRoutes = require("./routes/restaurantRoutes");
+const apartmentRoutes = require("./routes/apartmentRoutes");
 
 const errorHandler = (error, request, response, next) => {
   console.log("\n\n");
@@ -24,6 +25,7 @@ app.use(bodyParser.json());
 
 app.use(eventRoutes);
 app.use(restaurantRoutes);
+app.use(apartmentRoutes);
 app.use(roomRoutes);
 app.use(tableRoutes);
 
