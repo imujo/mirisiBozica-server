@@ -7,10 +7,11 @@ const { tryCatch } = require("../../../utils/tryCatch");
 router.get("/:id", tryCatch(controller.getById));
 router.get("/date/:date", tryCatch(controller.getByDate));
 
-// POST, PUT
+// POST, PUT, DEL
 
 router.post("/", tryCatch(controller.createEvent));
 router.put("/:id", tryCatch(controller.updateEvent));
+router.delete("/:id", tryCatch(controller.deleteEvent));
 
 // APARTMENTS
 

@@ -259,6 +259,27 @@ const updateActivity = async (req, res) => {
   });
 };
 
+const deleteEvent = async (req, res) => {
+  const { id } = req.params;
+
+  const event_id = await getEventId("activities_events", id);
+
+  if (!event_id) throw new Error("Could not get event id");
+
+  await db("activities_events")
+    .where({
+      id: id,
+      user_id: req.user.id,
+    })
+    .del();
+
+  await db("event_tables")
+    .where({ user_id: req.user.id, event_id: event_id })
+    .delete();
+
+  return res.json({ msg: "Deleted activities event", data: null });
+};
+
 module.exports = {
   getById,
   getByDate,
@@ -270,4 +291,5 @@ module.exports = {
   updateTables,
   getActivity,
   updateActivity,
+  deleteEvent,
 };

@@ -155,6 +155,23 @@ const updateConnectedEvent = async (req, res) => {
   });
 };
 
+const deleteEvent = async (req, res) => {
+  const { id } = req.params;
+
+  const event_id = await getEventId("other_events", id);
+
+  if (!event_id) throw new Error("Could not get event id");
+
+  await db("other_events")
+    .where({
+      id: id,
+      user_id: req.user.id,
+    })
+    .del();
+
+  return res.json({ msg: "Deleted other event", data: null });
+};
+
 module.exports = {
   getById,
   getByDate,
@@ -162,4 +179,5 @@ module.exports = {
   updateEvent,
   getConnectedEvent,
   updateConnectedEvent,
+  deleteEvent,
 };
