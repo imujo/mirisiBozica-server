@@ -3,13 +3,7 @@ const app = express();
 const bodyParser = require("body-parser");
 const cors = require("cors");
 require("dotenv").config();
-const eventRoutes = require("./routes/eventRoutes");
-const roomRoutes = require("./routes/roomRoutes");
-const tableRoutes = require("./routes/tableRoutes");
-const restaurantRoutes = require("./routes/restaurantRoutes");
-const apartmentRoutes = require("./routes/apartmentRoutes");
-const activitiesRoutes = require("./routes/activitiesRoutes");
-const otherRoutes = require("./routes/otherRoutes");
+const apiRoutes = require("./routes/api/_apiRoutes");
 
 const errorHandler = (error, request, response, next) => {
   console.log("\n\n");
@@ -25,13 +19,15 @@ const errorHandler = (error, request, response, next) => {
 app.use(cors());
 app.use(bodyParser.json());
 
-app.use(eventRoutes);
-app.use(restaurantRoutes);
-app.use(apartmentRoutes);
-app.use(activitiesRoutes);
-app.use(otherRoutes);
-app.use(roomRoutes);
-app.use(tableRoutes);
+app.use((req, res, next) => {
+  req.user = {
+    id: 1,
+  };
+
+  next();
+});
+
+app.use("/api", apiRoutes);
 
 app.use(errorHandler);
 

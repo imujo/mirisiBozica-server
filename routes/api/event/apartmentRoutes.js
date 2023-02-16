@@ -1,5 +1,5 @@
 const router = require("express").Router();
-const db = require("../config/database");
+const db = require("../../../config/database");
 const { put, get, postEvent, getSelect, putSelect } = require("./funcitons");
 
 // GET
