@@ -1,5 +1,5 @@
 const router = require("express").Router();
-const controller = require("../../../controllers/api/event/otherController");
+const controller = require("./controller");
 const { tryCatch } = require("../../../utils/tryCatch");
 
 // GET
@@ -7,15 +7,15 @@ const { tryCatch } = require("../../../utils/tryCatch");
 router.get("/:id", tryCatch(controller.getById));
 router.get("/date/:date", tryCatch(controller.getByDate));
 
-// POST, PUT DELETE
+// POST, PUT, DEL
 
 router.post("/", tryCatch(controller.createEvent));
 router.put("/:id", tryCatch(controller.updateEvent));
 router.delete("/:id", tryCatch(controller.deleteEvent));
 
-// CONNECTED EVENT
+// APARTMENTS
 
-router.get("/connected_event/:id", tryCatch(controller.getConnectedEvent));
-router.put("/connected_event/:id", tryCatch(controller.updateConnectedEvent));
+router.get("/apartments/:id", tryCatch(controller.getApartments));
+router.put("/apartments/:id", tryCatch(controller.updateApartments));
 
 module.exports = router;

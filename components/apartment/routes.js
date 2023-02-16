@@ -1,5 +1,5 @@
 const router = require("express").Router();
-const controller = require("../../controllers/api/apartmentsController");
+const controller = require("./controller");
 const { tryCatch } = require("../../utils/tryCatch");
 
 router.get("/all", tryCatch(controller.getAll));
