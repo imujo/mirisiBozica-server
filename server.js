@@ -9,6 +9,7 @@ const tableRoutes = require("./routes/tableRoutes");
 const restaurantRoutes = require("./routes/restaurantRoutes");
 const apartmentRoutes = require("./routes/apartmentRoutes");
 const activitiesRoutes = require("./routes/activitiesRoutes");
+const otherRoutes = require("./routes/otherRoutes");
 
 const errorHandler = (error, request, response, next) => {
   console.log("\n\n");
@@ -28,6 +29,7 @@ app.use(eventRoutes);
 app.use(restaurantRoutes);
 app.use(apartmentRoutes);
 app.use(activitiesRoutes);
+app.use(otherRoutes);
 app.use(roomRoutes);
 app.use(tableRoutes);
 
