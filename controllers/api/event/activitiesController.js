@@ -28,7 +28,7 @@ const getByDate = async (req, res) => {
     .where({ date: date, user_id: user.id })
     .select();
 
-  if (!response) {
+  if (!response.length) {
     return res.json({ msg: "No activities events found", data: null });
   }
 
