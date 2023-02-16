@@ -1,6 +1,6 @@
 const db = require("../../../config/database");
 const { addEvent, getEventId } = require("../../../utils/eventFunctions");
-// const validationSchema = require("../../../utils/formValidation/restaurantFormValidation");
+// const validationSchema = require("../../../utils/formValidation/activitiesFormValidation");
 
 // GET
 
@@ -8,31 +8,31 @@ const getById = async (req, res) => {
   const { id } = req.params;
   const user = req.user;
 
-  const response = await db("restaurant_events")
+  const response = await db("activities_events")
     .where({ id: id, user_id: user.id })
     .select()
     .first();
 
   if (!response) {
-    return res.json({ msg: "No restaurant event found", data: null });
+    return res.json({ msg: "No activities event found", data: null });
   }
 
-  return res.json({ msg: "Got restaurant event", data: response });
+  return res.json({ msg: "Got activities event", data: response });
 };
 
 const getByDate = async (req, res) => {
   const { date } = req.params;
   const user = req.user;
 
-  const response = await db("restaurant_events")
+  const response = await db("activities_events")
     .where({ date: date, user_id: user.id })
     .select();
 
   if (!response) {
-    return res.json({ msg: "No restaurant events found", data: null });
+    return res.json({ msg: "No activities events found", data: null });
   }
 
-  return res.json({ msg: "Got restaurant events", data: response });
+  return res.json({ msg: "Got activities events", data: response });
 };
 
 // POST, PUT
@@ -44,7 +44,7 @@ const createEvent = async (req, res) => {
     throw new Error("Could not create event");
   }
 
-  const response = await db("restaurant_events")
+  const response = await db("activities_events")
     .insert({
       event_id: event_id,
       user_id: req.user.id,
@@ -55,7 +55,7 @@ const createEvent = async (req, res) => {
   const id = response[0]?.id;
 
   if (!id) {
-    throw new Error("Could not create restaurant event");
+    throw new Error("Could not create activities event");
   }
 
   return res.json({
@@ -103,17 +103,17 @@ const updateEvent = async (req, res) => {
 
   const where = { id: id, user_id: req.user.id };
 
-  const response = await db("restaurant_events")
+  const response = await db("activities_events")
     .where(where)
     .update(insertBody)
     .returning("id");
 
   const response_id = response[0]?.id;
 
-  if (!response_id) throw new Error("Could not update resoraunt event");
+  if (!response_id) throw new Error("Could not update activities event");
 
   return res.json({
-    msg: "Updated restaurant event",
+    msg: "Updated activities event",
     data: {
       id: response_id,
     },
@@ -125,16 +125,16 @@ const updateEvent = async (req, res) => {
 const getRoom = async (req, res) => {
   const { id } = req.params;
 
-  const response = await db("restaurant_events")
+  const response = await db("activities_events")
     .where({ id: id, user_id: req.user.id })
     .select("room_id")
     .first();
 
   if (!response?.room_id) {
-    return res.json({ msg: "No restaurant event found", data: null });
+    return res.json({ msg: "No activities event found", data: null });
   }
 
-  return res.json({ msg: "Got restaurant event", data: response });
+  return res.json({ msg: "Got activities event", data: response });
 };
 
 const updateRoom = async (req, res) => {
@@ -148,7 +148,7 @@ const updateRoom = async (req, res) => {
     date_updated: new Date(),
   };
 
-  const response = await db("restaurant_events")
+  const response = await db("activities_events")
     .where(where)
     .update(insertBody)
     .returning("id");
@@ -158,7 +158,7 @@ const updateRoom = async (req, res) => {
   if (!response_id) throw new Error("Could not update resoraunt room");
 
   return res.json({
-    msg: "Updated restaurant room",
+    msg: "Updated activities room",
     data: {
       id: response_id,
     },
@@ -170,7 +170,7 @@ const updateRoom = async (req, res) => {
 const getTables = async (req, res) => {
   const { id } = req.params;
 
-  const event_id = await getEventId("restaurant_events", id);
+  const event_id = await getEventId("activities_events", id);
 
   if (!event_id) throw new Error("Could not get event id");
 
@@ -191,7 +191,7 @@ const updateTables = async (req, res) => {
   const { id } = req.params;
   const { table_ids } = req.body;
 
-  const event_id = await getEventId("restaurant_events", id);
+  const event_id = await getEventId("activities_events", id);
 
   await db("event_tables")
     .where({ event_id: event_id, user_id: req.user.id })
@@ -209,8 +209,53 @@ const updateTables = async (req, res) => {
   await db("event_tables").insert(tableData);
 
   return res.json({
-    msg: "Updated restaurant event tables",
+    msg: "Updated activities event tables",
     data: { id: id },
+  });
+};
+
+// ACTIVITY
+
+const getActivity = async (req, res) => {
+  const { id } = req.params;
+
+  const response = await db("activities_events")
+    .where({ id: id, user_id: req.user.id })
+    .select("activity_id")
+    .first();
+
+  if (!response?.activity_id) {
+    return res.json({ msg: "No activities event found", data: null });
+  }
+
+  return res.json({ msg: "Got activities event", data: response });
+};
+
+const updateActivity = async (req, res) => {
+  const { id } = req.params;
+  const { activity_id } = req.body;
+
+  const where = { id: id, user_id: req.user.id };
+
+  const insertBody = {
+    activity_id: activity_id,
+    date_updated: new Date(),
+  };
+
+  const response = await db("activities_events")
+    .where(where)
+    .update(insertBody)
+    .returning("id");
+
+  const response_id = response[0]?.id;
+
+  if (!response_id) throw new Error("Could not update activity event activity");
+
+  return res.json({
+    msg: "Updated activities activity",
+    data: {
+      id: response_id,
+    },
   });
 };
 
@@ -223,4 +268,6 @@ module.exports = {
   updateRoom,
   getTables,
   updateTables,
+  getActivity,
+  updateActivity,
 };
