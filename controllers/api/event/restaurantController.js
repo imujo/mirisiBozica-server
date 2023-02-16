@@ -1,9 +1,10 @@
 const db = require("../../../config/database");
-const { addEvent, getEventId } = require("../../../functions/eventFunctions");
+const { addEvent, getEventId } = require("../../../utils/eventFunctions");
+// const validationSchema = require("../../../utils/formValidation/restaurantFormValidation");
 
 // GET
 
-const getById = async (req, res, next) => {
+const getById = async (req, res) => {
   const { id } = req.params;
   const user = req.user;
 
@@ -19,7 +20,7 @@ const getById = async (req, res, next) => {
   return res.json({ msg: "Got restaurant event", data: response });
 };
 
-const getByDate = async (req, res, next) => {
+const getByDate = async (req, res) => {
   const { date } = req.params;
   const user = req.user;
 
@@ -36,7 +37,7 @@ const getByDate = async (req, res, next) => {
 
 // POST, PUT
 
-const createEvent = async (req, res, next) => {
+const createEvent = async (req, res) => {
   const event_id = await addEvent();
 
   if (!event_id) {
@@ -65,7 +66,7 @@ const createEvent = async (req, res, next) => {
   });
 };
 
-const updateEvent = async (req, res, next) => {
+const updateEvent = async (req, res) => {
   const { id } = req.params;
   const {
     guest,
@@ -90,6 +91,16 @@ const updateEvent = async (req, res, next) => {
     date_updated: new Date(),
   };
 
+  // const valid = validationSchema.validate(insertBody);
+
+  // console.log(valid.error.details);
+
+  // if (valid.error) {
+  //   throw Error(valid.error);
+  // }
+
+  // console.log("Valid: ", valid.error);
+
   const where = { id: id, user_id: req.user.id };
 
   const response = await db("restaurant_events")
@@ -111,7 +122,7 @@ const updateEvent = async (req, res, next) => {
 
 // ROOM
 
-const getRoom = async (req, res, next) => {
+const getRoom = async (req, res) => {
   const { id } = req.params;
 
   const response = await db("restaurant_events")
@@ -126,7 +137,7 @@ const getRoom = async (req, res, next) => {
   return res.json({ msg: "Got restaurant event", data: response });
 };
 
-const updateRoom = async (req, res, next) => {
+const updateRoom = async (req, res) => {
   const { id } = req.params;
   const { room_id } = req.body;
 
@@ -156,7 +167,7 @@ const updateRoom = async (req, res, next) => {
 
 // TABLES
 
-const getTables = async (req, res, next) => {
+const getTables = async (req, res) => {
   const { id } = req.params;
 
   const event_id = await getEventId("restaurant_events", id);
@@ -170,13 +181,13 @@ const getTables = async (req, res, next) => {
   const ids = response.map((el) => el["table_id"]);
 
   if (!ids.length) {
-    return res.json({ msg: "No tables found", data: null });
+    return res.json({ msg: "No tables found", data: [] });
   }
 
   return res.json({ msg: "Got tables", data: { ids: ids } });
 };
 
-const updateTables = async (req, res, next) => {
+const updateTables = async (req, res) => {
   const { id } = req.params;
   const { table_ids } = req.body;
 

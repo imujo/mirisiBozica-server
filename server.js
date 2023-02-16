@@ -4,17 +4,7 @@ const bodyParser = require("body-parser");
 const cors = require("cors");
 require("dotenv").config();
 const apiRoutes = require("./routes/api/_apiRoutes");
-
-const errorHandler = (error, request, response, next) => {
-  console.log("\n\n");
-  console.error(`ERROR - ${error.message}`);
-  console.log(error);
-  console.log("\n\n");
-
-  const status = error.status || 400;
-  response.status(status).json({ msg: error.message });
-  next();
-};
+const errorHandler = require("./middleware/errorHandler");
 
 app.use(cors());
 app.use(bodyParser.json());
