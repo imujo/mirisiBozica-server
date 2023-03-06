@@ -1,13 +1,16 @@
 const express = require("express");
 const app = express();
 const bodyParser = require("body-parser");
-const cors = require("cors");
+
 require("dotenv").config();
 const apiRoutes = require("./routes/api/apiRoutes");
 const errorHandler = require("./middleware/errorHandler");
 
-app.use(cors());
+const cors = require("cors");
+
 app.use(bodyParser.json());
+
+app.use(cors({ origin: "*" }));
 
 app.use((req, res, next) => {
   req.user = {

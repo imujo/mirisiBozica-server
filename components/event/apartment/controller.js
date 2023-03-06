@@ -1,6 +1,6 @@
 const db = require("../../../config/database");
 const { addEvent, getEventId } = require("../../../utils/eventFunctions");
-// const validationSchema = require("../../../utils/formValidation/apartmentFormValidation");
+const validationSchema = require("./validation");
 
 // GET
 
@@ -93,15 +93,9 @@ const updateEvent = async (req, res) => {
     date_updated: new Date(),
   };
 
-  // const valid = validationSchema.validate(insertBody);
+  const { error, value } = validationSchema.validate(insertBody);
 
-  // console.log(valid.error.details);
-
-  // if (valid.error) {
-  //   throw Error(valid.error);
-  // }
-
-  //   console.log("Valid: ", valid.error);
+  if (error) throw error;
 
   const where = { id: id, user_id: req.user.id };
 
@@ -146,7 +140,7 @@ const getApartments = async (req, res) => {
 
 const updateApartments = async (req, res) => {
   const { id } = req.params;
-  const { apartment_ids } = req.body;
+  const { selected_ids } = req.body;
 
   const event_id = await getEventId("apartment_events", id);
 
@@ -154,7 +148,7 @@ const updateApartments = async (req, res) => {
     .where({ event_id: event_id, user_id: req.user.id })
     .del();
 
-  const tableData = apartment_ids.map((id) => {
+  const tableData = selected_ids.map((id) => {
     return {
       apartment_id: id,
       user_id: req.user.id,

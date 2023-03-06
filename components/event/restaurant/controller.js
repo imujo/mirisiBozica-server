@@ -1,23 +1,33 @@
 const db = require("../../../config/database");
-const { addEvent, getEventId } = require("../../../utils/eventFunctions");
-// const validationSchema = require("../../../utils/formValidation/restaurantFormValidation");
+const { addEvent } = require("../../../utils/eventFunctions");
+const validationSchema = require("./validation");
+
+// TODO add middleware to check if event exist (event_id)
 
 // GET
 
 const getById = async (req, res) => {
-  const { id } = req.params;
+  const { event_id } = req.params;
   const user = req.user;
 
-  const response = await db("restaurant_events")
-    .where({ id: id, user_id: user.id })
-    .select()
+  // let response = await db("restaurant_events")
+  //   .where({ id: id, user_id: user.id })
+  //   .select()
+  //   .first();  event 12995 res event 12974
+  let restaurant_details = await db("restaurant_events")
+    .where({
+      event_id: event_id,
+      user_id: req.user.id,
+    })
     .first();
 
-  if (!response) {
-    return res.json({ msg: "No restaurant event found", data: null });
-  }
+  // let room = await db("rooms").where({ id: restaurant_details.room_id });
 
-  return res.json({ msg: "Got restaurant event", data: response });
+  // restaurant_details.room = room[0];
+
+  delete restaurant_details.room_id;
+
+  return res.json({ msg: "Got restaurant event", data: restaurant_details });
 };
 
 const getByDate = async (req, res) => {
@@ -61,13 +71,13 @@ const createEvent = async (req, res) => {
   return res.json({
     msg: "Created resturant event",
     data: {
-      id: id,
+      event_id: event_id,
     },
   });
 };
 
 const updateEvent = async (req, res) => {
-  const { id } = req.params;
+  const { event_id } = req.params;
   const {
     guest,
     n_adults,
@@ -91,17 +101,14 @@ const updateEvent = async (req, res) => {
     date_updated: new Date(),
   };
 
-  // const valid = validationSchema.validate(insertBody);
+  const { error, value } = validationSchema.validate(insertBody);
 
-  // console.log(valid.error.details);
+  if (error) throw error;
 
-  // if (valid.error) {
-  //   throw Error(valid.error);
-  // }
+  insertBody.start_time = insertBody.start_time.slice(11, 16);
+  insertBody.end_time = insertBody.end_time.slice(11, 16);
 
-  // console.log("Valid: ", valid.error);
-
-  const where = { id: id, user_id: req.user.id };
+  const where = { event_id: event_id, user_id: req.user.id };
 
   const response = await db("restaurant_events")
     .where(where)
@@ -123,34 +130,32 @@ const updateEvent = async (req, res) => {
 // ROOM
 
 const getRoom = async (req, res) => {
-  const { id } = req.params;
+  const { event_id } = req.params;
 
-  const response = await db("restaurant_events")
-    .where({ id: id, user_id: req.user.id })
-    .select("room_id")
-    .first();
+  const response = await db
+    .select("rooms.*")
+    .from("events")
+    .join("restaurant_events", "events.id", "=", "restaurant_events.event_id")
+    .join("rooms", "restaurant_events.room_id", "=", "rooms.id")
+    .where("events.id", event_id);
 
-  if (!response?.room_id) {
-    return res.json({ msg: "No restaurant event found", data: null });
-  }
-
-  return res.json({ msg: "Got restaurant event", data: response });
+  return res.json({ msg: "Got room", data: response });
 };
 
 const updateRoom = async (req, res) => {
-  const { id } = req.params;
-  const { room_id } = req.body;
+  const { event_id } = req.params;
+  let { id: room_id } = req.body;
 
-  const where = { id: id, user_id: req.user.id };
-
-  const insertBody = {
-    room_id: room_id,
-    date_updated: new Date(),
-  };
+  await db("event_tables")
+    .where({ user_id: req.user.id, event_id: event_id })
+    .del();
 
   const response = await db("restaurant_events")
-    .where(where)
-    .update(insertBody)
+    .where({ event_id: event_id, user_id: req.user.id })
+    .update({
+      room_id: room_id,
+      date_updated: new Date(),
+    })
     .returning("id");
 
   const response_id = response[0]?.id;
@@ -168,11 +173,7 @@ const updateRoom = async (req, res) => {
 // TABLES
 
 const getTables = async (req, res) => {
-  const { id } = req.params;
-
-  const event_id = await getEventId("restaurant_events", id);
-
-  if (!event_id) throw new Error("Could not get event id");
+  const { event_id } = req.params;
 
   const response = await db("event_tables")
     .where({ user_id: req.user.id, event_id: event_id })
@@ -183,21 +184,23 @@ const getTables = async (req, res) => {
   if (!ids.length) {
     return res.json({ msg: "No tables found", data: [] });
   }
+  const tables = await db("tables")
+    .where({ user_id: req.user.id })
+    .whereIn("id", ids)
+    .select();
 
-  return res.json({ msg: "Got tables", data: { ids: ids } });
+  return res.json({ msg: "Got tables", data: tables });
 };
 
 const updateTables = async (req, res) => {
-  const { id } = req.params;
-  const { table_ids } = req.body;
-
-  const event_id = await getEventId("restaurant_events", id);
+  const { event_id } = req.params;
+  const { selected_ids } = req.body;
 
   await db("event_tables")
     .where({ event_id: event_id, user_id: req.user.id })
     .del();
 
-  const tableData = table_ids.map((id) => {
+  const tableData = selected_ids.map((id) => {
     return {
       table_id: id,
       user_id: req.user.id,
@@ -210,27 +213,25 @@ const updateTables = async (req, res) => {
 
   return res.json({
     msg: "Updated restaurant event tables",
-    data: { id: id },
+    data: { event_id: event_id },
   });
 };
 
 const deleteEvent = async (req, res) => {
-  const { id } = req.params;
-
-  const event_id = await getEventId("restaurant_events", id);
-
-  if (!event_id) throw new Error("Could not get event id");
+  const { event_id } = req.params;
 
   await db("restaurant_events")
     .where({
-      id: id,
+      event_id: event_id,
       user_id: req.user.id,
     })
     .del();
 
   await db("event_tables")
     .where({ user_id: req.user.id, event_id: event_id })
-    .delete();
+    .del();
+
+  await db("events").where({ id: event_id }).del();
 
   return res.json({ msg: "Deleted restaurant event", data: null });
 };

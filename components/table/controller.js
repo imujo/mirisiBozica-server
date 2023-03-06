@@ -26,6 +26,34 @@ const getAll = async (req, res) => {
   return res.json({ msg: "Got tables", data: response });
 };
 
+const getMultiple = async (req, res) => {
+  const { ids } = req.query;
+
+  const response = await db("tables")
+    .where({ user_id: req.user.id })
+    .whereIn("id", ids)
+    .select();
+
+  if (!response.length) {
+    return res.json({ msg: "No tables found", data: [] });
+  }
+
+  return res.json({ msg: "Got tables", data: response });
+};
+
+const getAllInRoom = async (req, res) => {
+  const { room_id } = req.params;
+  const response = await db("tables")
+    .where({ user_id: req.user.id, room_id: room_id })
+    .select();
+
+  if (!response.length) {
+    return res.json({ msg: "No tables found", data: [] });
+  }
+
+  return res.json({ msg: "Got tables", data: response });
+};
+
 const post = async (req, res) => {
   const { title, room_id, capacity } = req.body;
 
@@ -116,4 +144,6 @@ module.exports = {
   put,
   del,
   putRoom,
+  getAllInRoom,
+  getMultiple,
 };

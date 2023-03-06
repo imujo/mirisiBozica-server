@@ -1,6 +1,6 @@
 const db = require("../../../config/database");
 const { addEvent, getEventId } = require("../../../utils/eventFunctions");
-// const validationSchema = require("../../../utils/formValidation/activitiesFormValidation");
+const validationSchema = require("./validation");
 
 // GET
 
@@ -91,15 +91,12 @@ const updateEvent = async (req, res) => {
     date_updated: new Date(),
   };
 
-  // const valid = validationSchema.validate(insertBody);
+  const { error, value } = validationSchema.validate(insertBody);
 
-  // console.log(valid.error.details);
+  if (error) throw error;
 
-  // if (valid.error) {
-  //   throw Error(valid.error);
-  // }
-
-  // console.log("Valid: ", valid.error);
+  insertBody.start_time = insertBody.start_time.slice(11, 16);
+  insertBody.end_time = insertBody.end_time.slice(11, 16);
 
   const where = { id: id, user_id: req.user.id };
 
@@ -189,7 +186,7 @@ const getTables = async (req, res) => {
 
 const updateTables = async (req, res) => {
   const { id } = req.params;
-  const { table_ids } = req.body;
+  const { selected_ids } = req.body;
 
   const event_id = await getEventId("activities_events", id);
 
@@ -197,7 +194,7 @@ const updateTables = async (req, res) => {
     .where({ event_id: event_id, user_id: req.user.id })
     .del();
 
-  const tableData = table_ids.map((id) => {
+  const tableData = selected_ids.map((id) => {
     return {
       table_id: id,
       user_id: req.user.id,
