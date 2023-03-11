@@ -1,15 +1,15 @@
 const db = require("../../../config/database");
-const { addEvent, getEventId } = require("../../../utils/eventFunctions");
+const { addEvent } = require("../../../utils/eventFunctions");
 const validationSchema = require("./validation");
 
 // GET
 
 const getById = async (req, res) => {
-  const { id } = req.params;
+  const { event_id } = req.params;
   const user = req.user;
 
   const response = await db("apartment_events")
-    .where({ id: id, user_id: user.id })
+    .where({ event_id: event_id, user_id: user.id })
     .select()
     .first();
 
@@ -63,13 +63,13 @@ const createEvent = async (req, res) => {
   return res.json({
     msg: "Created apartment event",
     data: {
-      id: id,
+      event_id: event_id,
     },
   });
 };
 
 const updateEvent = async (req, res) => {
-  const { id } = req.params;
+  const { event_id } = req.params;
   const {
     guest,
     n_adults,
@@ -97,7 +97,7 @@ const updateEvent = async (req, res) => {
 
   if (error) throw error;
 
-  const where = { id: id, user_id: req.user.id };
+  const where = { event_id: event_id, user_id: req.user.id };
 
   const response = await db("apartment_events")
     .where(where)
@@ -119,11 +119,7 @@ const updateEvent = async (req, res) => {
 // APARTMENTS
 
 const getApartments = async (req, res) => {
-  const { id } = req.params;
-
-  const event_id = await getEventId("apartment_events", id);
-
-  if (!event_id) throw new Error("Could not get event id");
+  const { event_id } = req.params;
 
   const response = await db("event_apartments")
     .where({ user_id: req.user.id, event_id: event_id })
@@ -135,14 +131,16 @@ const getApartments = async (req, res) => {
     return res.json({ msg: "No apartments found", data: [] });
   }
 
-  return res.json({ msg: "Got apartments", data: { ids: ids } });
+  const apartments = await db("apartments")
+    .where({ user_id: req.user.id })
+    .whereIn("id", ids);
+
+  return res.json({ msg: "Got apartments", data: apartments });
 };
 
 const updateApartments = async (req, res) => {
-  const { id } = req.params;
+  const { event_id } = req.params;
   const { selected_ids } = req.body;
-
-  const event_id = await getEventId("apartment_events", id);
 
   await db("event_apartments")
     .where({ event_id: event_id, user_id: req.user.id })
@@ -161,20 +159,15 @@ const updateApartments = async (req, res) => {
 
   return res.json({
     msg: "Updated apartment event apartments",
-    data: { id: id },
   });
 };
 
 const deleteEvent = async (req, res) => {
-  const { id } = req.params;
-
-  const event_id = await getEventId("apartment_events", id);
-
-  if (!event_id) throw new Error("Could not get event id");
+  const { event_id } = req.params;
 
   await db("apartment_events")
     .where({
-      id: id,
+      event_id: event_id,
       user_id: req.user.id,
     })
     .del();
