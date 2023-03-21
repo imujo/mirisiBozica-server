@@ -1,5 +1,8 @@
 const db = require("../../../config/database");
-const { addEvent } = require("../../../utils/eventFunctions");
+const {
+  addEvent,
+  dateToFormatedDate,
+} = require("../../../utils/eventFunctions");
 const validationSchema = require("./validation");
 
 // GET
@@ -26,8 +29,12 @@ const getByDate = async (req, res) => {
 
   const response = await db("apartment_events")
     .where({ user_id: user.id })
-    .andWhere("date_in", "<=", date)
-    .andWhere("date_out", ">=", date)
+    .andWhere(
+      db.raw(
+        "to_date(?, 'YYYY-MM-DD') between to_date(date_in, 'YYYY-MM-DD') and to_date(date_out, 'YYYY-MM-DD')",
+        [dateToFormatedDate(date)]
+      )
+    )
     .select();
 
   if (!response.length) {
@@ -85,8 +92,8 @@ const updateEvent = async (req, res) => {
     guest: guest,
     n_adults: n_adults,
     n_children: n_children,
-    date_in: date_in,
-    date_out: date_out,
+    date_in: dateToFormatedDate(date_in),
+    date_out: dateToFormatedDate(date_out),
     bed_and_breakfast: bed_and_breakfast,
     details: details,
     price: price,

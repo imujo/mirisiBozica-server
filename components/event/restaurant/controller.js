@@ -1,5 +1,8 @@
 const db = require("../../../config/database");
-const { addEvent } = require("../../../utils/eventFunctions");
+const {
+  addEvent,
+  dateToFormatedDate,
+} = require("../../../utils/eventFunctions");
 const validationSchema = require("./validation");
 
 // TODO add middleware to check if event exist (event_id)
@@ -35,7 +38,8 @@ const getByDate = async (req, res) => {
   const user = req.user;
 
   const response = await db("restaurant_events")
-    .where({ date: date, user_id: user.id })
+    .where({ user_id: user.id, date: dateToFormatedDate(date) })
+    .orderBy("start_time")
     .select();
 
   if (!response.length) {
@@ -95,7 +99,7 @@ const updateEvent = async (req, res) => {
     n_children: n_children,
     start_time: start_time,
     end_time: end_time,
-    date: date,
+    date: dateToFormatedDate(date),
     details: details,
     price: price,
     date_updated: new Date(),

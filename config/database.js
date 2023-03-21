@@ -16,8 +16,7 @@ process.env.PRODUCTION === "true"
   : (knexSetup = {
       client: "pg",
       connection: {
-        database: process.env.DATABASE,
-        user: process.env.DB_USERNAME,
+        connectionString: process.env.CONNECTION_STRING,
       },
     });
 

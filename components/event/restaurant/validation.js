@@ -2,8 +2,8 @@ const Joi = require("joi");
 
 const schema = Joi.object({
   guest: Joi.string().max(30).required(),
-  n_adults: Joi.number().required().min(1),
-  n_children: Joi.number(),
+  n_adults: Joi.number().required().min(1).max(40),
+  n_children: Joi.number().max(40),
   date: Joi.date().required(),
   start_time: Joi.date().required(),
   end_time: Joi.date().min(Joi.ref("start_time")).required().messages({

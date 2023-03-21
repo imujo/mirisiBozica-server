@@ -33,4 +33,8 @@ const getEventId = async (tableName, id) => {
   }
 };
 
-module.exports = { addEvent, getEventId };
+const dateToFormatedDate = (date) => {
+  return date.slice(0, 10);
+};
+
+module.exports = { addEvent, getEventId, dateToFormatedDate };
